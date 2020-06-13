@@ -1,7 +1,7 @@
-import { awaitResponse, Condition } from "../await/await-response";
-import { SingleConnection } from "../client/connection";
-import { ConnectionError } from "../client/errors";
-import { CapMessage } from "../message/twitch-types/cap";
+import { awaitResponse, Condition } from "../await/await-response.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { ConnectionError } from "../client/errors.ts";
+import { CapMessage } from "../message/twitch-types/cap.ts";
 
 export class CapabilitiesError extends ConnectionError {}
 

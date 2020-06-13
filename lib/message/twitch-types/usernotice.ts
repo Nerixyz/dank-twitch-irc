@@ -1,17 +1,16 @@
-import camelCase = require("lodash.camelcase");
-import { TwitchBadgesList } from "../badges";
-import { Color } from "../color";
-import { TwitchEmoteList } from "../emotes";
-import { ChannelIRCMessage } from "../irc/channel-irc-message";
-import { getParameter, IRCMessageData } from "../irc/irc-message";
-import { IRCMessageTags } from "../irc/tags";
+import { TwitchBadgesList } from "../badges.ts";
+import { Color } from "../color.ts";
+import { TwitchEmoteList } from "../emotes.ts";
+import { ChannelIRCMessage } from "../irc/channel-irc-message.ts";
+import { getParameter, IRCMessageData } from "../irc/irc-message.ts";
+import { IRCMessageTags } from "../irc/tags.ts";
 import {
   convertToBoolean,
   convertToInt,
   convertToString,
   requireData,
   tagParserFor,
-} from "../parser/tag-values";
+} from "../parser/tag-values.ts";
 
 const convertersMap: Record<string, (value: string) => any> = {
   "msg-param-cumulative-months": convertToInt,
@@ -30,7 +29,8 @@ export function getCamelCasedName(tagKey: string): string {
   newKey = newKey.substring(10);
 
   // camel case
-  newKey = camelCase(newKey);
+  newKey = newKey.replace(/-([^-]+)/g,
+    (str, match: string) => `${match.charAt(0).toUpperCase()}${match.substring(1)}`);
 
   // convert somethingId to somethingID
   newKey = newKey.replace(/Id$/g, "ID");

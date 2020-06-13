@@ -1,7 +1,7 @@
-import { IRCMessage } from "../irc/irc-message";
-import { IRCMessageTags } from "../irc/tags";
-import { ParseError } from "./parse-error";
-import { parseTags } from "./tags";
+import { IRCMessage } from "../irc/irc-message.ts";
+import { IRCMessageTags } from "../irc/tags.ts";
+import { ParseError } from "./parse-error.ts";
+import { parseTags } from "./tags.ts";
 
 const VALID_CMD_REGEX = /^(?:[a-zA-Z]+|[0-9]{3})$/;
 

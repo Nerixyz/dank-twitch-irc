@@ -1,8 +1,8 @@
-import Semaphore from "semaphore-async-await";
-import { ChatClient } from "../../client/client";
-import { applyReplacements } from "../../utils/apply-function-replacements";
-import { ClientMixin } from "../base-mixin";
-import { canSpamFast } from "./utils";
+import { ChatClient } from "../../client/client.ts";
+import { applyReplacements } from "../../utils/apply-function-replacements.ts";
+import Semaphore from "../../utils/semaphore.ts";
+import { ClientMixin } from "../base-mixin.ts";
+import { canSpamFast } from "./utils.ts";
 
 export class PrivmsgMessageRateLimiter implements ClientMixin {
   private readonly client: ChatClient;

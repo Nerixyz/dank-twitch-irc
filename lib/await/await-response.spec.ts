@@ -1,16 +1,15 @@
-import { assert } from "chai";
-import * as sinon from "sinon";
-import { ConnectionError, MessageError } from "../client/errors";
-import { assertErrorChain, fakeConnection } from "../helpers.spec";
-import { parseTwitchMessage } from "../message/parser/twitch-message";
-import { BaseError } from "../utils/base-error";
-import { ignoreErrors } from "../utils/ignore-errors";
-import { awaitResponse, ResponseAwaiter } from "./await-response";
-import { TimeoutError } from "./timeout-error";
+import { ConnectionError, MessageError } from "../client/errors.ts";
+import { assertErrorChain, fakeConnection } from "../helpers.spec.ts";
+import { parseTwitchMessage } from "../message/parser/twitch-message.ts";
+import { BaseError } from "../utils/base-error.ts";
+import { ignoreErrors } from "../utils/ignore-errors.ts";
+import { awaitResponse, ResponseAwaiter } from "./await-response.ts";
+import { TimeoutError } from "./timeout-error.ts";
+import { assertStrictEquals, } from "https://deno.land/std/testing/asserts.ts";
 
-describe("./await/await-response", function () {
-  describe("ResponseAwaiter", function () {
-    it("should add itself to list of waiters", function () {
+Deno.test("./await/await-response", () => {
+  Deno.test("ResponseAwaiter", () => {
+    Deno.test("should add itself to list of waiters", () => {
       const { client, end } = fakeConnection();
 
       const awaiter1 = new ResponseAwaiter(client, {
@@ -25,12 +24,11 @@ describe("./await/await-response", function () {
       });
       awaiter2.promise.catch(ignoreErrors);
 
-      assert.deepStrictEqual(client.pendingResponses, [awaiter1, awaiter2]);
-
+      assertStrictEquals(client.pendingResponses, [awaiter1, awaiter2]);
       end();
     });
 
-    it("should resolve on matching incoming message", async function () {
+    Deno.test("should resolve on matching incoming message", async () => {
       const { client, end } = fakeConnection();
 
       const wantedMsg = parseTwitchMessage("PONG :tmi.twitch.tv");
@@ -45,14 +43,14 @@ describe("./await/await-response", function () {
 
       end();
 
-      assert.strictEqual(await promise, wantedMsg);
-      assert.deepStrictEqual(client.pendingResponses, []);
+      assertStrictEquals(await promise, wantedMsg);
+      assertStrictEquals(client.pendingResponses, []);
     });
 
-    it("should reject on matching incoming message", async function () {
+    Deno.test("should reject on matching incoming message", async () => {
       const { client, clientError, emitAndEnd } = fakeConnection();
 
-      const wantedMsg = "PONG :tmi.twitch.tv";
+      const wantedMsg = "PONG :tmi.twitch.tv.ts";
 
       const promise = awaitResponse(client, {
         failure: (msg) => msg.rawSource === wantedMsg,
@@ -69,7 +67,7 @@ describe("./await/await-response", function () {
         MessageError,
         "Bad response message: PONG :tmi.twitch.tv"
       );
-      assert.deepStrictEqual(client.pendingResponses, []);
+      assertStrictEquals(client.pendingResponses, []);
 
       await assertErrorChain(
         clientError,
@@ -80,7 +78,7 @@ describe("./await/await-response", function () {
       );
     });
 
-    it("should reject on connection close (no error)", async function () {
+    Deno.test("should reject on connection close (no error)", async () => {
       const { client, end, clientError } = fakeConnection();
 
       const promise = awaitResponse(client, {
@@ -161,6 +159,12 @@ describe("./await/await-response", function () {
         "peer reset connection"
       );
     });
+  });
+});
+
+describe("./await/await-response", function () {
+  describe("ResponseAwaiter", function () {
+
 
     it("should timeout after specified timeout (noResponseAction = failure)", async function () {
       sinon.useFakeTimers();
@@ -252,7 +256,7 @@ describe("./await/await-response", function () {
         errorType: (message, cause) => new BaseError(message, cause),
         errorMessage: "test awaiter1 failure",
       });
-      const expectedMsg = "PONG :tmi.twitch.tv";
+      const expectedMsg = "PONG :tmi.twitch.tv.ts";
 
       const promise2 = awaitResponse(client, {
         success: (msg) => msg.rawSource === expectedMsg,

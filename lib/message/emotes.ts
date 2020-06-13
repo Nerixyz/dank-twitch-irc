@@ -1,3 +1,3 @@
-import { TwitchEmote } from "./emote";
+import { TwitchEmote } from "./emote.ts";
 
 export type TwitchEmoteList = TwitchEmote[];

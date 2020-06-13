@@ -1,6 +1,6 @@
-import { ChannelIRCMessage } from "../irc/channel-irc-message";
-import { IRCMessageData, requireParameter } from "../irc/irc-message";
-import { tagParserFor } from "../parser/tag-values";
+import { ChannelIRCMessage } from "../irc/channel-irc-message.ts";
+import { IRCMessageData, requireParameter } from "../irc/irc-message.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
 
 export class ClearmsgMessage extends ChannelIRCMessage {
   public readonly targetUsername: string;

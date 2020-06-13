@@ -1,4 +1,4 @@
-import { TwitchBadge } from "./badge";
+import { TwitchBadge } from "./badge.ts";
 
 export class TwitchBadgesList extends Array<TwitchBadge> {
   public get hasAdmin(): boolean {

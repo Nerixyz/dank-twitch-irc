@@ -1,14 +1,14 @@
-import { TwitchBadgesList } from "../badges";
-import { Color } from "../color";
-import { TwitchEmoteList } from "../emotes";
-import { ChannelIRCMessage } from "../irc/channel-irc-message";
+import { TwitchBadgesList } from "../badges.ts";
+import { Color } from "../color.ts";
+import { TwitchEmoteList } from "../emotes.ts";
+import { ChannelIRCMessage } from "../irc/channel-irc-message.ts";
 import {
   IRCMessage,
   requireNickname,
   requireParameter,
-} from "../irc/irc-message";
-import { tagParserFor } from "../parser/tag-values";
-import { UserState } from "./userstate";
+} from "../irc/irc-message.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
+import { UserState } from "./userstate.ts";
 
 const actionRegex = /^\u0001ACTION (.*)\u0001$/;
 

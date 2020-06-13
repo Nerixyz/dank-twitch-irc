@@ -1,8 +1,8 @@
-import { TwitchBadgesList } from "../badges";
-import { Color } from "../color";
-import { IRCMessage, IRCMessageData } from "../irc/irc-message";
-import { TwitchEmoteSets } from "../parser/emote-sets";
-import { tagParserFor } from "../parser/tag-values";
+import { TwitchBadgesList } from "../badges.ts";
+import { Color } from "../color.ts";
+import { IRCMessage, IRCMessageData } from "../irc/irc-message.ts";
+import { TwitchEmoteSets } from "../parser/emote-sets.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
 
 /**
  * Global state of the logged in user.

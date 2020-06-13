@@ -1,8 +1,8 @@
-import { ChatClient } from "../client/client";
-import { PrivmsgMessage } from "../message/twitch-types/privmsg";
-import { applyReplacements } from "../utils/apply-function-replacements";
-import { ClientMixin } from "./base-mixin";
-import { canSpamFast } from "./ratelimiters/utils";
+import { ChatClient } from "../client/client.ts";
+import { PrivmsgMessage } from "../message/twitch-types/privmsg.ts";
+import { applyReplacements } from "../utils/apply-function-replacements.ts";
+import { ClientMixin } from "./base-mixin.ts";
+import { canSpamFast } from "./ratelimiters/utils.ts";
 
 export const invisibleSuffix = " \u{000e0000}";
 

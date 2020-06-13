@@ -1,4 +1,4 @@
-import { ParseError } from "./parse-error";
+import { ParseError } from "./parse-error.ts";
 
 export function parseIntThrowing(str: string | null | undefined): number {
   if (str == null) {

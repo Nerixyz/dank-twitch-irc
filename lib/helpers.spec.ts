@@ -1,30 +1,7 @@
-import * as chai from "chai";
-import { assert } from "chai";
-import * as chaiAsPromised from "chai-as-promised";
-import "clarify";
-import { BaseError } from "make-error-cause";
-import * as sinon from "sinon";
-import { Duplex } from "stream";
-import { inspect } from "util";
-import * as util from "util";
-import { ChatClient } from "./client/client";
-import { SingleConnection } from "./client/connection";
-
-chai.config.includeStack = true;
-chai.use(chaiAsPromised);
-
-afterEach(function () {
-  sinon.restore();
-});
-
-afterEach(function () {
-  if (this.currentTest != null && this.currentTest.err != null) {
-    // tslint:disable-next-line:no-console
-    console.error(inspect(this.currentTest.err, { colors: true }));
-    // tslint:disable-next-line:no-console
-    console.error("Below is the default mocha output:");
-  }
-});
+import { ChatClient } from "./client/client.ts";
+import { SingleConnection } from "./client/connection.ts";
+import { assertStrictEquals, assert , assertThrowsAsync, fail} from "https://deno.land/std/testing/asserts.ts";
+import { BaseError } from "./utils/base-error.ts";
 
 export function errorOf(p: Promise<any>): Promise<any> {
   return p.catch((e) => e);
@@ -39,15 +16,15 @@ function assertLink(e: Error, chain: any[], depth = 0): void {
 
   const actualPrototype = Object.getPrototypeOf(e);
   const expectedPrototype = errorType.prototype;
-  assert.strictEqual(
+  assertStrictEquals(
     actualPrototype,
     expectedPrototype,
     `Error at depth ${depth} should be directly instanceof ` +
-      `${util.inspect(expectedPrototype)}, ` +
-      `is instance of: ${util.inspect(actualPrototype)}`
+      `${expectedPrototype}, ` +
+      `is instance of: ${actualPrototype}`
   );
 
-  assert.strictEqual(
+  assertStrictEquals(
     e.message,
     message,
     `Error at depth ${depth} should have error message "${message}"`
@@ -64,7 +41,7 @@ function assertLink(e: Error, chain: any[], depth = 0): void {
     assert(
       cause == null,
       `Error at depth ${depth} should not have a cause, ` +
-        `but has the following cause: ${inspect(cause)}`
+        `but has the following cause: ${cause}`
     );
   }
 }
@@ -89,7 +66,7 @@ export function assertErrorChain(
       }
 
       for (const eElement of e) {
-        await assert.isRejected(eElement);
+        await assertThrowsAsync(() => eElement);
         const error: BaseError = await errorOf(eElement);
         assertLink(error, chain);
       }
@@ -105,7 +82,7 @@ export function assertThrowsChain(f: () => void, ...chain: any[]): void {
     return;
   }
 
-  assert.fail("Function did not throw an exception");
+  fail("Function did not throw an exception");
 }
 
 export type MockTransportData = {

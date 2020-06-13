@@ -1,14 +1,14 @@
-import * as debugLogger from "debug-logger";
-import * as EventEmitter from "eventemitter3";
-import { ChatClient } from "../client/client";
+import { ChatClient } from "../client/client.ts";
 import {
   hasAllStateTags,
   RoomState,
   RoomstateMessage,
-} from "../message/twitch-types/roomstate";
-import { ClientMixin } from "./base-mixin";
+} from "../message/twitch-types/roomstate.ts";
+import { EventEmitter } from "../utils/typed-event-emitter.ts";
+import { ClientMixin } from "./base-mixin.ts";
+import * as debugLogger from "https://deno.land/std/log/mod.ts";
 
-const log = debugLogger("dank-twitch-irc:roomstate-tracker");
+const log = debugLogger.getLogger("dank-twitch-irc:roomstate-tracker");
 
 export interface RoomStateTrackerEvents {
   newChannelState: [string, RoomState];
@@ -39,7 +39,7 @@ export class RoomStateTracker extends EventEmitter<RoomStateTrackerEvents>
 
     if (currentState == null) {
       if (!hasAllStateTags(extractedState)) {
-        log.warn(
+        log.warning(
           "Got incomplete ROOMSTATE before receiving complete roomstate:",
           msg.rawSource
         );

@@ -1,8 +1,8 @@
-import { SingleConnection } from "../client/connection";
-import { ConnectionError, MessageError } from "../client/errors";
-import { IRCMessage } from "../message/irc/irc-message";
-import { setDefaults } from "../utils/set-defaults";
-import { TimeoutError } from "./timeout-error";
+import { SingleConnection } from "../client/connection.ts";
+import { ConnectionError, MessageError } from "../client/errors.ts";
+import { IRCMessage } from "../message/irc/irc-message.ts";
+import { setDefaults } from "../utils/set-defaults.ts";
+import { TimeoutError } from "./timeout-error.ts";
 
 export type Condition = (message: IRCMessage) => boolean;
 export const alwaysFalse: Condition = (): false => false;
@@ -131,7 +131,7 @@ export class ResponseAwaiter {
       this.config.errorMessage,
       cause
     );
-    process.nextTick(() => this.conn.emitError(errorWithCause, true));
+    queueMicrotask(() => this.conn.emitError(errorWithCause, true));
     this.rejectPromise(errorWithCause);
   }
 

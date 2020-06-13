@@ -1,6 +1,6 @@
-import { SingleConnection } from "../client/connection";
-import { sendPing } from "../operations/ping";
-import { setDefaults } from "../utils/set-defaults";
+import { SingleConnection } from "../client/connection.ts";
+import { sendPing } from "../operations/ping.ts";
+import { setDefaults } from "../utils/set-defaults.ts";
 
 export interface ClientPingConfig {
   /**

@@ -1,7 +1,7 @@
-import { SingleConnection } from "../client/connection";
-import { MAX_OUTGOING_COMMAND_LENGTH } from "../constants";
-import { splitIntoChunks } from "../utils/split-into-chunks";
-import { awaitJoinResponse } from "./join";
+import { SingleConnection } from "../client/connection.ts";
+import { MAX_OUTGOING_COMMAND_LENGTH } from "../constants.ts";
+import { splitIntoChunks } from "../utils/split-into-chunks.ts";
+import { awaitJoinResponse } from "./join.ts";
 
 export async function joinAll(
   conn: SingleConnection,

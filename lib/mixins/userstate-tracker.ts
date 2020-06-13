@@ -1,12 +1,12 @@
-import * as EventEmitter from "eventemitter3";
-import { ChatClient } from "../client/client";
+import { ChatClient } from "../client/client.ts";
 import {
   GlobalUserState,
   GlobaluserstateMessage,
-} from "../message/twitch-types/globaluserstate";
-import { PrivmsgMessage } from "../message/twitch-types/privmsg";
-import { UserState, UserstateMessage } from "../message/twitch-types/userstate";
-import { ClientMixin } from "./base-mixin";
+} from "../message/twitch-types/globaluserstate.ts";
+import { PrivmsgMessage } from "../message/twitch-types/privmsg.ts";
+import { UserState, UserstateMessage } from "../message/twitch-types/userstate.ts";
+import { EventEmitter } from "../utils/typed-event-emitter.ts";
+import { ClientMixin } from "./base-mixin.ts";
 
 export interface UserStateTrackerEvents {
   newGlobalState: [GlobalUserState];

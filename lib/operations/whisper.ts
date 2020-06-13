@@ -1,9 +1,9 @@
-import { awaitResponse } from "../await/await-response";
-import { SingleConnection } from "../client/connection";
-import { MessageError } from "../client/errors";
-import { NoticeMessage } from "../message/twitch-types/notice";
-import { validateChannelName } from "../validation/channel";
-import { sendPrivmsg } from "./privmsg";
+import { awaitResponse } from "../await/await-response.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { MessageError } from "../client/errors.ts";
+import { NoticeMessage } from "../message/twitch-types/notice.ts";
+import { validateChannelName } from "../validation/channel.ts";
+import { sendPrivmsg } from "./privmsg.ts";
 
 export class WhisperError extends MessageError {
   public targetUsername: string;

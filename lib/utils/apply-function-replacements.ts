@@ -1,4 +1,4 @@
-import { A } from "ts-toolbelt";
+import { Is } from "./ts-toolbelt-polyfill.ts";
 
 // modified O.SelectKeys type from ts-toolbelt that uses keyof O
 // instead of Keys<O>
@@ -6,7 +6,7 @@ export declare type SelectKeys<O extends object, M extends any> = {
   [K in keyof O]: {
     1: K;
     0: never;
-  }[A.Is<O[K], M>];
+  }[Is<O[K], M>];
 }[keyof O];
 
 export type FunctionKeysOf<T extends object> = SelectKeys<
@@ -45,7 +45,8 @@ export function applyReplacement<
     this: T,
     ...args: Parameters<typeof oldFn>
   ): ReturnType<typeof oldFn> {
-    return newFn.call(self, oldFn.bind(this), ...args);
+    // TODO: ?????????????????????????????????
+    return (newFn as any).call(self, oldFn.bind(this as any), ...args);
   }
 
   // define the new fn as not enumerable

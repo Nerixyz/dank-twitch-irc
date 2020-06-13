@@ -1,9 +1,9 @@
-import { awaitResponse } from "../await/await-response";
-import { SingleConnection } from "../client/connection";
-import { MessageError } from "../client/errors";
-import { Color, colorToHexString } from "../message/color";
-import { NoticeMessage } from "../message/twitch-types/notice";
-import { sendPrivmsg } from "./privmsg";
+import { awaitResponse } from "../await/await-response.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { MessageError } from "../client/errors.ts";
+import { Color, colorToHexString } from "../message/color.ts";
+import { NoticeMessage } from "../message/twitch-types/notice.ts";
+import { sendPrivmsg } from "./privmsg.ts";
 
 export class SetColorError extends MessageError {
   public wantedColor: Color;

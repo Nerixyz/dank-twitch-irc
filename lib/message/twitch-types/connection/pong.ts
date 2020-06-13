@@ -2,7 +2,7 @@ import {
   getParameter,
   IRCMessage,
   IRCMessageData,
-} from "../../irc/irc-message";
+} from "../../irc/irc-message.ts";
 
 export class PongMessage extends IRCMessage {
   public readonly argument: string | undefined;

@@ -1,7 +1,8 @@
-import * as makeErrorCause from "make-error-cause";
 
-export class BaseError extends makeErrorCause.BaseError {
-  public constructor(message?: string, cause?: Error | undefined) {
+export class BaseError extends Error {
+  public cause?: Error;
+
+  public constructor(message?: string, cause?: Error) {
     let newMessage;
     if (
       message != null &&
@@ -17,7 +18,7 @@ export class BaseError extends makeErrorCause.BaseError {
     } else {
       newMessage = "";
     }
-
-    super(newMessage, cause);
+    super(newMessage);
+    this.cause = cause;
   }
 }

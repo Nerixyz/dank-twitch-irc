@@ -1,21 +1,21 @@
-import { setDefaults } from "../utils/set-defaults";
+import { setDefaults } from "../utils/set-defaults.ts";
 import {
   BasicTcpTransportConfiguration,
   ClientConfiguration,
-  DuplexTransportConfiguration,
+//  DuplexTransportConfiguration,
   RateLimitsConfig,
   TcpTransportConfiguration,
   TransportConfiguration,
   WebSocketTransportConfiguration,
-} from "./config";
+} from "./config.ts";
 import {
   messageRateLimitPresets,
   MessageRateLimits,
-} from "./message-rate-limits";
+} from "./message-rate-limits.ts";
 
-export type ExpandedDuplexTransportConfiguration = Required<
-  DuplexTransportConfiguration
->;
+//export type ExpandedDuplexTransportConfiguration = Required<
+//  DuplexTransportConfiguration
+//>;
 
 export type ExpandedTcpTransportConfiguration = Required<
   TcpTransportConfiguration
@@ -28,8 +28,8 @@ export type ExpandedWebSocketTransportConfiguration = WebSocketTransportConfigur
 };
 
 export type ExpandedTransportConfiguration =
-  | ExpandedDuplexTransportConfiguration
-  | ExpandedTcpTransportConfiguration
+//  | ExpandedDuplexTransportConfiguration
+//  | ExpandedTcpTransportConfiguration
   | ExpandedWebSocketTransportConfiguration;
 
 export type ExpandedClientConfiguration = Required<
@@ -53,7 +53,7 @@ const defaults: Omit<
   maxChannelCountPerConnection: 90,
 
   connection: {
-    type: "tcp",
+    type: undefined,
     secure: true,
   },
 
@@ -72,34 +72,12 @@ export function expandTransportConfig(
   if (config == null) {
     return expandTransportConfig({
       secure: true,
+      type: "websocket"
     });
   }
 
   switch (config.type) {
-    case "tcp":
     case undefined:
-      let host;
-      let port;
-
-      if ("host" in config && "port" in config) {
-        host = config.host;
-        port = config.port;
-      } else {
-        host = "irc.chat.twitch.tv";
-        port = config.secure ? 6697 : 6667;
-      }
-
-      return {
-        type: "tcp",
-        secure: config.secure,
-        host,
-        port,
-        preSetup: false,
-      };
-
-    case "duplex":
-      return setDefaults(config, { preSetup: false });
-
     case "websocket":
       let url;
       if ("url" in config) {

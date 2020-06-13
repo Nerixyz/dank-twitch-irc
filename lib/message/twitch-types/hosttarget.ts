@@ -1,7 +1,7 @@
-import { reasonForValue } from "../../utils/reason-for-value";
-import { ChannelIRCMessage } from "../irc/channel-irc-message";
-import { IRCMessageData, requireParameter } from "../irc/irc-message";
-import { ParseError } from "../parser/parse-error";
+import { reasonForValue } from "../../utils/reason-for-value.ts";
+import { ChannelIRCMessage } from "../irc/channel-irc-message.ts";
+import { IRCMessageData, requireParameter } from "../irc/irc-message.ts";
+import { ParseError } from "../parser/parse-error.ts";
 
 export function parseHostedChannelName(
   rawHostedChannelName: string | undefined

@@ -1,9 +1,9 @@
-import { awaitResponse } from "../await/await-response";
-import { SingleConnection } from "../client/connection";
-import { MessageError } from "../client/errors";
-import { NoticeMessage } from "../message/twitch-types/notice";
-import { UserstateMessage } from "../message/twitch-types/userstate";
-import { sendPrivmsg } from "./privmsg";
+import { awaitResponse } from "../await/await-response.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { MessageError } from "../client/errors.ts";
+import { NoticeMessage } from "../message/twitch-types/notice.ts";
+import { UserstateMessage } from "../message/twitch-types/userstate.ts";
+import { sendPrivmsg } from "./privmsg.ts";
 
 export function removeCommands(message: string): string {
   if (message.startsWith(".") || message.startsWith("/")) {

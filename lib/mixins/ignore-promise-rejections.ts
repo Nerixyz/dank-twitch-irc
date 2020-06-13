@@ -1,7 +1,7 @@
-import { ChatClient } from "../client/client";
-import { applyReplacements } from "../utils/apply-function-replacements";
-import { ignoreErrors } from "../utils/ignore-errors";
-import { ClientMixin } from "./base-mixin";
+import { ChatClient } from "../client/client.ts";
+import { applyReplacements } from "../utils/apply-function-replacements.ts";
+import { ignoreErrors } from "../utils/ignore-errors.ts";
+import { ClientMixin } from "./base-mixin.ts";
 
 export class IgnoreUnhandledPromiseRejectionsMixin implements ClientMixin {
   public applyToClient(client: ChatClient): void {

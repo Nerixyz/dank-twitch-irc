@@ -1,5 +1,5 @@
-import { reasonForValue } from "../utils/reason-for-value";
-import { ValidationError } from "./validation-error";
+import { reasonForValue } from "../utils/reason-for-value.ts";
+import { ValidationError } from "./validation-error.ts";
 
 const channelNameRegex = /^[a-z0-9_]{1,25}$/;
 const chatRoomRegex = /^chatrooms:\d{1,20}:[0-9a-f]{8}\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\b[0-9a-f]{12}$/;

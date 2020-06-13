@@ -1,11 +1,11 @@
-import Semaphore from "semaphore-async-await";
-import { ChatClient } from "../../client/client";
-import { RoomState } from "../../message/twitch-types/roomstate";
-import { UserState } from "../../message/twitch-types/userstate";
-import { applyReplacements } from "../../utils/apply-function-replacements";
-import { EditableTimeout } from "../../utils/editable-timeout";
-import { ClientMixin } from "../base-mixin";
-import { canSpamFast } from "./utils";
+import { ChatClient } from "../../client/client.ts";
+import { RoomState } from "../../message/twitch-types/roomstate.ts";
+import { UserState } from "../../message/twitch-types/userstate.ts";
+import { applyReplacements } from "../../utils/apply-function-replacements.ts";
+import { EditableTimeout } from "../../utils/editable-timeout.ts";
+import Semaphore from "../../utils/semaphore.ts";
+import { ClientMixin } from "../base-mixin.ts";
+import { canSpamFast } from "./utils.ts";
 
 export class SlowModeRateLimiter implements ClientMixin {
   public static GLOBAL_SLOW_MODE_COOLDOWN = 1.5;

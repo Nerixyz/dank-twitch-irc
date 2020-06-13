@@ -1,17 +1,16 @@
-import { Duplex } from "stream";
-import { ConnectionRateLimits } from "../mixins/ratelimiters/connection";
-import { MessageRateLimits, PresetKeys } from "./message-rate-limits";
+import { ConnectionRateLimits } from "../mixins/ratelimiters/connection.ts";
+import { MessageRateLimits, PresetKeys } from "./message-rate-limits.ts";
 
-export interface DuplexTransportConfiguration {
-  type: "duplex";
-  stream: () => Duplex;
-
-  /**
-   * Whether this stream is already set up (user logged in and
-   * capabilities enabled). Defaults to false.
-   */
-  preSetup?: boolean;
-}
+//export interface DuplexTransportConfiguration {
+//  type: "duplex";
+//  stream: () => Duplex;
+//
+//  /**
+//   * Whether this stream is already set up (user logged in and
+//   * capabilities enabled). Defaults to false.
+//   */
+//  preSetup?: boolean;
+//}
 
 export interface TcpTransportConfiguration {
   type?: "tcp";
@@ -36,9 +35,9 @@ export interface PresetWebSocketTransportConfiguration {
 }
 
 export type TransportConfiguration =
-  | DuplexTransportConfiguration
-  | TcpTransportConfiguration
-  | BasicTcpTransportConfiguration
+//  | DuplexTransportConfiguration
+//  | TcpTransportConfiguration
+//  | BasicTcpTransportConfiguration
   | WebSocketTransportConfiguration
   | PresetWebSocketTransportConfiguration;
 

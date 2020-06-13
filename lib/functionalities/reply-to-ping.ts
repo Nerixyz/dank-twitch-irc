@@ -1,4 +1,4 @@
-import { SingleConnection } from "../client/connection";
+import { SingleConnection } from "../client/connection.ts";
 
 export function replyToServerPing(conn: SingleConnection): void {
   conn.on("PING", (msg) => {

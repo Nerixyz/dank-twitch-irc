@@ -1,4 +1,4 @@
-import { SingleConnection } from "../client/connection";
+import { SingleConnection } from "../client/connection.ts";
 
 export async function sendPrivmsg(
   conn: SingleConnection,

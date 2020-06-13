@@ -1,4 +1,4 @@
-import { ValidationError } from "./validation-error";
+import { ValidationError } from "./validation-error.ts";
 
 export function validateIRCCommand(command: string): void {
   if (command.includes("\n") || command.includes("\r")) {

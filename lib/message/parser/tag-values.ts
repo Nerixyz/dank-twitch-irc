@@ -1,13 +1,13 @@
-import { TwitchBadgesList } from "../badges";
-import { Color } from "../color";
-import { TwitchEmoteList } from "../emotes";
-import { IRCMessageTags } from "../irc/tags";
-import { parseBadges } from "./badges";
-import { parseColor } from "./color";
-import { parseEmoteSets, TwitchEmoteSets } from "./emote-sets";
-import { parseEmotes } from "./emotes";
-import { MissingTagError } from "./missing-tag-error";
-import { ParseError } from "./parse-error";
+import { TwitchBadgesList } from "../badges.ts";
+import { Color } from "../color.ts";
+import { TwitchEmoteList } from "../emotes.ts";
+import { IRCMessageTags } from "../irc/tags.ts";
+import { parseBadges } from "./badges.ts";
+import { parseColor } from "./color.ts";
+import { parseEmoteSets, TwitchEmoteSets } from "./emote-sets.ts";
+import { parseEmotes } from "./emotes.ts";
+import { MissingTagError } from "./missing-tag-error.ts";
+import { ParseError } from "./parse-error.ts";
 
 export function requireData<V, A extends any[]>(
   ircTags: IRCMessageTags,

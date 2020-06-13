@@ -1,6 +1,6 @@
-import { MissingDataError } from "../parser/missing-data-error";
-import { IRCMessagePrefix } from "./prefix";
-import { IRCMessageTags } from "./tags";
+import { MissingDataError } from "../parser/missing-data-error.ts";
+import { IRCMessagePrefix } from "./prefix.ts";
+import { IRCMessageTags } from "./tags.ts";
 
 export interface IRCMessageData {
   readonly rawSource: string;

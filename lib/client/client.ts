@@ -1,31 +1,31 @@
-import * as debugLogger from "debug-logger";
-import { ClientConfiguration } from "../config/config";
-import { Color } from "../message/color";
-import { ClientMixin, ConnectionMixin } from "../mixins/base-mixin";
-import { IgnoreUnhandledPromiseRejectionsMixin } from "../mixins/ignore-promise-rejections";
-import { ConnectionRateLimiter } from "../mixins/ratelimiters/connection";
-import { PrivmsgMessageRateLimiter } from "../mixins/ratelimiters/privmsg";
-import { RoomStateTracker } from "../mixins/roomstate-tracker";
-import { UserStateTracker } from "../mixins/userstate-tracker";
-import { joinChannel, joinNothingToDo } from "../operations/join";
-import { joinAll } from "../operations/join-all";
-import { partChannel, partNothingToDo } from "../operations/part";
-import { sendPing } from "../operations/ping";
-import { sendPrivmsg } from "../operations/privmsg";
-import { me, say } from "../operations/say";
-import { setColor } from "../operations/set-color";
-import { timeout } from "../operations/timeout";
-import { whisper } from "../operations/whisper";
-import { anyCauseInstanceof } from "../utils/any-cause-instanceof";
-import { findAndPushToEnd } from "../utils/find-and-push-to-end";
-import { removeInPlace } from "../utils/remove-in-place";
-import { unionSets } from "../utils/union-sets";
-import { validateChannelName } from "../validation/channel";
-import { BaseClient } from "./base-client";
-import { SingleConnection } from "./connection";
-import { ClientError } from "./errors";
+import * as debugLogger from "https://deno.land/std/log/mod.ts";
+import { ClientConfiguration } from "../config/config.ts";
+import { Color } from "../message/color.ts";
+import { ClientMixin, ConnectionMixin } from "../mixins/base-mixin.ts";
+import { IgnoreUnhandledPromiseRejectionsMixin } from "../mixins/ignore-promise-rejections.ts";
+import { ConnectionRateLimiter } from "../mixins/ratelimiters/connection.ts";
+import { PrivmsgMessageRateLimiter } from "../mixins/ratelimiters/privmsg.ts";
+import { RoomStateTracker } from "../mixins/roomstate-tracker.ts";
+import { UserStateTracker } from "../mixins/userstate-tracker.ts";
+import { joinChannel, joinNothingToDo } from "../operations/join.ts";
+import { joinAll } from "../operations/join-all.ts";
+import { partChannel, partNothingToDo } from "../operations/part.ts";
+import { sendPing } from "../operations/ping.ts";
+import { sendPrivmsg } from "../operations/privmsg.ts";
+import { me, say } from "../operations/say.ts";
+import { setColor } from "../operations/set-color.ts";
+import { timeout } from "../operations/timeout.ts";
+import { whisper } from "../operations/whisper.ts";
+import { anyCauseInstanceof } from "../utils/any-cause-instanceof.ts";
+import { findAndPushToEnd } from "../utils/find-and-push-to-end.ts";
+import { removeInPlace } from "../utils/remove-in-place.ts";
+import { unionSets } from "../utils/union-sets.ts";
+import { validateChannelName } from "../validation/channel.ts";
+import { BaseClient } from "./base-client.ts";
+import { SingleConnection } from "./connection.ts";
+import { ClientError } from "./errors.ts";
 
-const log = debugLogger("dank-twitch-irc:client");
+const log = debugLogger.getLogger("dank-twitch-irc:client");
 
 export type ConnectionPredicate = (conn: SingleConnection) => boolean;
 const alwaysTrue = (): true => true as const;
@@ -62,7 +62,7 @@ export class ChatClient extends BaseClient {
 
     this.on("error", (error) => {
       if (anyCauseInstanceof(error, ClientError)) {
-        process.nextTick(() => {
+        queueMicrotask(() => {
           this.emitClosed(error);
           this.connections.forEach((conn) => conn.destroy(error));
         });
@@ -229,7 +229,7 @@ export class ChatClient extends BaseClient {
     conn.on("error", (error) => this.emitError(error));
     conn.on("close", (hadError) => {
       if (hadError) {
-        log.warn(`Connection ${conn.connectionID} was closed due to error`);
+        log.warning(`Connection ${conn.connectionID} was closed due to error`);
       } else {
         log.debug(`Connection ${conn.connectionID} closed normally`);
       }

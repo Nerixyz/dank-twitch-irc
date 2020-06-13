@@ -1,8 +1,8 @@
-import Semaphore from "semaphore-async-await";
-import { ChatClient } from "../../client/client";
-import { SingleConnection } from "../../client/connection";
-import { applyReplacements } from "../../utils/apply-function-replacements";
-import { ClientMixin, ConnectionMixin } from "../base-mixin";
+import { ChatClient } from "../../client/client.ts";
+import { SingleConnection } from "../../client/connection.ts";
+import { applyReplacements } from "../../utils/apply-function-replacements.ts";
+import Semaphore from "../../utils/semaphore.ts";
+import { ClientMixin, ConnectionMixin } from "../base-mixin.ts";
 
 export interface ConnectionRateLimits {
   parallelConnections: number;

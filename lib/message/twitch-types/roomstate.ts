@@ -1,7 +1,6 @@
-import pickBy = require("lodash.pickby");
-import { ChannelIRCMessage } from "../irc/channel-irc-message";
-import { IRCMessageData } from "../irc/irc-message";
-import { tagParserFor } from "../parser/tag-values";
+import { ChannelIRCMessage } from "../irc/channel-irc-message.ts";
+import { IRCMessageData } from "../irc/irc-message.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
 
 export interface RoomState {
   emoteOnly: boolean;
@@ -96,6 +95,6 @@ export class RoomstateMessage extends ChannelIRCMessage {
       subscribersOnlyRaw: this.subscribersOnlyRaw,
     };
 
-    return pickBy(fullObj, (v) => v != null);
+    return Object.fromEntries(Object.entries(fullObj).filter(([,value]) => value != null));
   }
 }

@@ -1,18 +1,13 @@
-import * as randomstring from "randomstring";
-import { awaitResponse } from "../await/await-response";
-import { SingleConnection } from "../client/connection";
-import { ConnectionError } from "../client/errors";
-import { PongMessage } from "../message/twitch-types/connection/pong";
+import { awaitResponse } from "../await/await-response.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { ConnectionError } from "../client/errors.ts";
+import { PongMessage } from "../message/twitch-types/connection/pong.ts";
 
 export class PingTimeoutError extends ConnectionError {}
 
 function randomPingIdentifier(): string {
-  const randomHexString = randomstring.generate({
-    charset: "hex",
-    length: 32,
-    capitalization: "lowercase",
-  });
-  return `dank-twitch-irc:manual:${randomHexString}`;
+  // scuffed but a quick replacement
+  return `dank-twitch-irc:manual:${(Math.random()*10e18).toString(16)}${(Math.random()*10e18).toString(16)}`;
 }
 
 export async function sendPing(

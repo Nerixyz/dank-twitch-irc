@@ -1,7 +1,7 @@
-import { TwitchEmote } from "../emote";
-import { TwitchEmoteList } from "../emotes";
-import { parseIntThrowing } from "./common";
-import { ParseError } from "./parse-error";
+import { TwitchEmote } from "../emote.ts";
+import { TwitchEmoteList } from "../emotes.ts";
+import { parseIntThrowing } from "./common.ts";
+import { ParseError } from "./parse-error.ts";
 
 export function parseEmotes(
   messageText: string,

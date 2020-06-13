@@ -1,12 +1,12 @@
-import { TwitchBadgesList } from "../badges";
-import { Color } from "../color";
-import { TwitchEmoteList } from "../emotes";
+import { TwitchBadgesList } from "../badges.ts";
+import { Color } from "../color.ts";
+import { TwitchEmoteList } from "../emotes.ts";
 import {
   IRCMessage,
   requireNickname,
   requireParameter,
-} from "../irc/irc-message";
-import { tagParserFor } from "../parser/tag-values";
+} from "../irc/irc-message.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
 
 // @badges=;color=#1E90FF;display-name=BotFactory;emotes=;message-id=6134;thread-id=40286300_403015524;turbo=0;
 // user-id=403015524;user-type= :botfactory!botfactory@botfactory.tmi.twitch.tv WHISPER randers :Pong

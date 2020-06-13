@@ -1,10 +1,9 @@
-import ms = require("ms");
-import { awaitResponse } from "../await/await-response";
-import { matchingNotice } from "../await/conditions";
-import { SingleConnection } from "../client/connection";
-import { MessageError } from "../client/errors";
-import { validateChannelName } from "../validation/channel";
-import { sendPrivmsg } from "./privmsg";
+import { awaitResponse } from "../await/await-response.ts";
+import { matchingNotice } from "../await/conditions.ts";
+import { SingleConnection } from "../client/connection.ts";
+import { MessageError } from "../client/errors.ts";
+import { validateChannelName } from "../validation/channel.ts";
+import { sendPrivmsg } from "./privmsg.ts";
 
 export class UserTimeoutError extends MessageError {
   public channelName: string;
@@ -69,6 +68,7 @@ export async function timeout(
       new UserTimeoutError(channelName, username, length, reason, msg, cause),
     errorMessage:
       `Failed to timeout ${username} for ` +
-      `${ms(length * 1000)} in #${channelName}`,
+      // TODO: ms package
+      `${length}s in #${channelName}`,
   });
 }

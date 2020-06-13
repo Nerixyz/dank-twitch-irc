@@ -1,5 +1,5 @@
-import { reasonForValue } from "../../utils/reason-for-value";
-import { MissingDataError } from "./missing-data-error";
+import { reasonForValue } from "../../utils/reason-for-value.ts";
+import { MissingDataError } from "./missing-data-error.ts";
 
 export class MissingTagError extends MissingDataError {
   public constructor(

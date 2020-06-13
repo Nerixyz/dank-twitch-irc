@@ -1,4 +1,4 @@
-import { BaseError } from "../utils/base-error";
+import { BaseError } from "../utils/base-error.ts";
 // tslint:disable:max-classes-per-file
 
 /**

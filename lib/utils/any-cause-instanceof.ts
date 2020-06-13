@@ -1,4 +1,4 @@
-import { BaseError } from "make-error-cause";
+import { BaseError } from "./base-error.ts";
 
 export function causeOf(error: Error): Error | undefined {
   if (error instanceof BaseError) {

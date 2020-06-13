@@ -1,5 +1,5 @@
-import { ChatClient } from "../client/client";
-import { SingleConnection } from "../client/connection";
+import { ChatClient } from "../client/client.ts";
+import { SingleConnection } from "../client/connection.ts";
 
 export interface ClientMixin {
   applyToClient(client: ChatClient): void;

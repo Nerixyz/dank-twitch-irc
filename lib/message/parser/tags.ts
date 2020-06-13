@@ -1,4 +1,4 @@
-import { IRCMessageTags } from "../irc/tags";
+import { IRCMessageTags } from "../irc/tags.ts";
 
 const decodeMap: Record<string, string> = {
   "\\\\": "\\",

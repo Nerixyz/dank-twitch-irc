@@ -1,40 +1,42 @@
-import { Duplexify } from "duplexify";
-import * as duplexify from "duplexify";
-import * as WebSocketDuplex from "simple-websocket";
-import { PassThrough } from "stream";
-import { ExpandedWebSocketTransportConfiguration } from "../../config/expanded";
-import { Transport } from "./transport";
+import {WebSocket, connectWebSocket} from "https://deno.land/std/ws/mod.ts";
+import { ExpandedWebSocketTransportConfiguration } from "../../config/expanded.ts";
+import { ignoreErrors } from "../../utils/ignore-errors.ts";
+import { Transport } from "./transport.ts";
 
 export class WebSocketTransport implements Transport {
-  public readonly stream: Duplexify;
-  private readonly readable: PassThrough;
-  private readonly writable: PassThrough;
+  //@ts-ignore
+  public readable;
 
   private readonly config: ExpandedWebSocketTransportConfiguration;
-  private wsStream: WebSocketDuplex | undefined;
+  private wsStream?: WebSocket;
 
   public constructor(config: ExpandedWebSocketTransportConfiguration) {
     this.config = config;
-
-    this.readable = new PassThrough({ decodeStrings: false, objectMode: true });
-    this.writable = new PassThrough({ decodeStrings: false, objectMode: true });
-    this.stream = duplexify(this.writable, this.readable, {
-      decodeStrings: false,
-      objectMode: true,
-    });
   }
-
-  public connect(connectionListener?: () => void): void {
-    this.wsStream = new WebSocketDuplex({
-      url: this.config.url,
-      decodeStrings: false,
-      objectMode: true,
-    });
-    if (connectionListener != null) {
-      this.wsStream.once("connect", connectionListener);
+  close(): void {
+    if(this.wsStream && !this.wsStream.isClosed) {
+      this.wsStream.close();
+      this.readable.cancel();
     }
-
-    this.wsStream.pipe(this.readable);
-    this.writable.pipe(this.wsStream);
   }
+
+  public async connect(connectionListener?: () => void): Promise<void> {
+    this.wsStream = await connectWebSocket(this.config.url);
+    this.readable = asyncIteratorToReadable(this.wsStream);
+    connectionListener?.();
+  }
+
+  public write(chunk: string) {
+    this.wsStream!.send(chunk);
+  }
+}
+export function asyncIteratorToReadable<T>(iterable: AsyncIterable<T>): ReadableStream<T> {
+  const iterator = iterable[Symbol.asyncIterator]();
+  return new ReadableStream({
+    async pull(controller: ReadableStreamDefaultController) {
+      iterator.next()
+        .then(result => result.done ? controller.close() : (controller.enqueue(result.value)))
+        .catch(e => controller.error(e));
+    }
+  });
 }

@@ -1,10 +1,10 @@
-import { getIRCChannelName } from "../irc/channel-irc-message";
+import { getIRCChannelName } from "../irc/channel-irc-message.ts";
 import {
   IRCMessage,
   IRCMessageData,
   requireParameter,
-} from "../irc/irc-message";
-import { tagParserFor } from "../parser/tag-values";
+} from "../irc/irc-message.ts";
+import { tagParserFor } from "../parser/tag-values.ts";
 
 export class NoticeMessage extends IRCMessage {
   public readonly channelName: string | undefined;

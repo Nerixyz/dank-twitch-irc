@@ -1,5 +1,5 @@
-import { SingleConnection } from "../client/connection";
-import { ConnectionError } from "../client/errors";
+import { SingleConnection } from "../client/connection.ts";
+import { ConnectionError } from "../client/errors.ts";
 
 export class ReconnectError extends ConnectionError {
   public constructor(message: string, cause?: Error) {
@@ -9,7 +9,7 @@ export class ReconnectError extends ConnectionError {
 
 export function handleReconnectMessage(conn: SingleConnection): void {
   conn.on("RECONNECT", (msg) => {
-    process.nextTick(() => {
+    queueMicrotask(() => {
       conn.emitError(
         new ReconnectError(
           "RECONNECT command received by server: " + msg.rawSource

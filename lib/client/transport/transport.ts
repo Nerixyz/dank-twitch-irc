@@ -1,6 +1,6 @@
-import { Duplex } from "stream";
-
 export interface Transport {
-  readonly stream: Duplex;
+  readonly readable: ReadableStream<string>;
   connect(connectionListener?: () => void): void;
+  write(chunk: string): void;
+  close(): void;
 }

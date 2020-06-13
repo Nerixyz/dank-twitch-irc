@@ -1,21 +1,20 @@
-import * as debugLogger from "debug-logger";
-import * as split2 from "split2";
-import { ResponseAwaiter } from "../await/await-response";
-import { ClientConfiguration } from "../config/config";
-import { handleReconnectMessage } from "../functionalities/handle-reconnect-message";
-import { replyToServerPing } from "../functionalities/reply-to-ping";
-import { sendClientPings } from "../functionalities/send-pings";
-import { parseTwitchMessage } from "../message/parser/twitch-message";
-import { ConnectionMixin } from "../mixins/base-mixin";
-import { sendLogin } from "../operations/login";
-import { requestCapabilities } from "../operations/request-capabilities";
-import { anyCauseInstanceof } from "../utils/any-cause-instanceof";
-import { ignoreErrors } from "../utils/ignore-errors";
-import { validateIRCCommand } from "../validation/irc-command";
-import { BaseClient } from "./base-client";
-import { ConnectionError, ProtocolError } from "./errors";
-import { makeTransport } from "./transport/make-transport";
-import { Transport } from "./transport/transport";
+import * as debugLogger from "https://deno.land/std/log/mod.ts";
+import { ResponseAwaiter } from "../await/await-response.ts";
+import { ClientConfiguration } from "../config/config.ts";
+import { handleReconnectMessage } from "../functionalities/handle-reconnect-message.ts";
+import { replyToServerPing } from "../functionalities/reply-to-ping.ts";
+import { sendClientPings } from "../functionalities/send-pings.ts";
+import { parseTwitchMessage } from "../message/parser/twitch-message.ts";
+import { ConnectionMixin } from "../mixins/base-mixin.ts";
+import { sendLogin } from "../operations/login.ts";
+import { requestCapabilities } from "../operations/request-capabilities.ts";
+import { anyCauseInstanceof } from "../utils/any-cause-instanceof.ts";
+import { ignoreErrors } from "../utils/ignore-errors.ts";
+import { validateIRCCommand } from "../validation/irc-command.ts";
+import { BaseClient } from "./base-client.ts";
+import { ConnectionError, ProtocolError } from "./errors.ts";
+import { makeTransport } from "./transport/make-transport.ts";
+import { Transport } from "./transport/transport.ts";
 
 let connectionIDCounter = 0;
 
@@ -28,7 +27,7 @@ export class SingleConnection extends BaseClient {
   public readonly pendingResponses: ResponseAwaiter[] = [];
   public readonly transport: Transport;
 
-  protected readonly log = debugLogger(
+  protected readonly log = debugLogger.getLogger(
     `dank-twitch-irc:connection:${this.connectionID}`
   );
 
@@ -37,9 +36,9 @@ export class SingleConnection extends BaseClient {
 
     this.on("error", (e) => {
       if (anyCauseInstanceof(e, ConnectionError)) {
-        process.nextTick(() => {
+        queueMicrotask(() => {
           this.emitClosed(e);
-          this.transport.stream.destroy(e);
+          this.transport.close();
         });
       }
     });
@@ -47,23 +46,40 @@ export class SingleConnection extends BaseClient {
 
     this.transport = makeTransport(this.configuration.connection);
 
-    this.transport.stream.on("close", () => {
-      this.emitClosed();
-    });
-    this.transport.stream.on("error", (e) => {
-      const emittedError = new ConnectionError(
-        "Error occurred in transport layer",
-        e
-      );
-      this.emitError(emittedError);
-      this.emitClosed(emittedError);
-      this.transport.stream.destroy(emittedError);
-    });
-
-    this.transport.stream.pipe(split2()).on("data", this.handleLine.bind(this));
-
     replyToServerPing(this);
     handleReconnectMessage(this);
+  }
+
+  public createTransportSink(): UnderlyingSink<string> {
+    return {
+      close: () => {
+        this.emitClosed();
+      },
+      abort: (reason: Error) => {
+        const emittedError = new ConnectionError(
+          "Error occurred in transport layer",
+          reason
+        );
+        this.emitError(emittedError);
+        this.emitClosed(emittedError);
+        this.transport.close();
+      },
+      write: (chunk: string) => {
+        this.handleLine(chunk);
+      },
+      start() {
+      }
+    };
+  }
+
+  private createSplitTransformer() : Transformer<string> {
+    return {
+      transform(chunk: string, controller: TransformStreamDefaultController) {
+        for (const line of chunk.split("\r\n").slice(0, -1)) {
+            controller.enqueue(line);
+        }
+      }
+    }
   }
 
   public connect(): void {
@@ -75,7 +91,10 @@ export class SingleConnection extends BaseClient {
 
     this.emitConnecting();
 
-    if (!this.configuration.connection.preSetup) {
+    this.once("connect", () => {
+      this.transport.readable
+        .pipeThrough(new TransformStream(this.createSplitTransformer()))
+        .pipeTo(new WritableStream(this.createTransportSink()));
       const promises = [
         requestCapabilities(
           this,
@@ -85,32 +104,28 @@ export class SingleConnection extends BaseClient {
           this,
           this.configuration.username,
           this.configuration.password
-        ),
+        )
       ];
 
       Promise.all(promises).then(() => this.emitReady(), ignoreErrors);
-    } else {
-      this.once("connect", () => {
-        process.nextTick(() => this.emitReady());
-      });
-    }
+    });
 
     this.transport.connect(() => this.emitConnected());
   }
 
   public close(): void {
     // -> close is emitted
-    this.transport.stream.destroy();
+    this.transport.close();
   }
 
   public destroy(error?: Error): void {
-    this.transport.stream.destroy(error);
+    this.transport.close();
   }
 
   public sendRaw(command: string): void {
     validateIRCCommand(command);
-    this.log.trace(">", command);
-    this.transport.stream.write(command + "\r\n");
+    this.log.info(">", command);
+    this.transport.write(command + "\r\n");
   }
 
   public onConnect(): void {
@@ -127,7 +142,7 @@ export class SingleConnection extends BaseClient {
       return;
     }
 
-    this.log.trace("<", line);
+    this.log.info("<", line);
 
     let message;
     try {

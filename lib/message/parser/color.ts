@@ -1,5 +1,5 @@
-import { Color } from "../color";
-import { ParseError } from "./parse-error";
+import { Color } from "../color.ts";
+import { ParseError } from "./parse-error.ts";
 
 const rgbColorRegex = /^#([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})$/;
 
