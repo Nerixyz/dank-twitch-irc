@@ -72,16 +72,6 @@ export class SingleConnection extends BaseClient {
     };
   }
 
-  private createSplitTransformer() : Transformer<string> {
-    return {
-      transform(chunk: string, controller: TransformStreamDefaultController) {
-        for (const line of chunk.split("\r\n").slice(0, -1)) {
-            controller.enqueue(line);
-        }
-      }
-    }
-  }
-
   public async connect(): Promise<void> {
     if (!this.unconnected) {
       throw new Error(
