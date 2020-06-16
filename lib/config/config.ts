@@ -13,10 +13,11 @@ import { MessageRateLimits, PresetKeys } from "./message-rate-limits.ts";
 //}
 
 export interface TcpTransportConfiguration {
-  type?: "tcp";
+  type?: 'tcp';
   secure: boolean;
   host: string;
   port: number;
+  bufferSize: number;
 }
 
 export type BasicTcpTransportConfiguration = Omit<
@@ -36,8 +37,8 @@ export interface PresetWebSocketTransportConfiguration {
 
 export type TransportConfiguration =
 //  | DuplexTransportConfiguration
-//  | TcpTransportConfiguration
-//  | BasicTcpTransportConfiguration
+  | TcpTransportConfiguration
+  | BasicTcpTransportConfiguration
   | WebSocketTransportConfiguration
   | PresetWebSocketTransportConfiguration;
 

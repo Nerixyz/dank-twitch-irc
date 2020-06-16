@@ -29,7 +29,7 @@ export type ExpandedWebSocketTransportConfiguration = WebSocketTransportConfigur
 
 export type ExpandedTransportConfiguration =
 //  | ExpandedDuplexTransportConfiguration
-//  | ExpandedTcpTransportConfiguration
+  | ExpandedTcpTransportConfiguration
   | ExpandedWebSocketTransportConfiguration;
 
 export type ExpandedClientConfiguration = Required<
@@ -53,8 +53,9 @@ const defaults: Omit<
   maxChannelCountPerConnection: 90,
 
   connection: {
-    type: undefined,
+    type: 'tcp',
     secure: true,
+    bufferSize: 4096
   },
 
   connectionRateLimits: {
@@ -77,7 +78,27 @@ export function expandTransportConfig(
   }
 
   switch (config.type) {
+    case "tcp":
     case undefined:
+      let host;
+      let port;
+
+      if ("host" in config && "port" in config) {
+        host = config.host;
+        port = config.port;
+      } else {
+        host = "irc.chat.twitch.tv";
+        port = config.secure ? 6697 : 6667;
+      }
+
+      return {
+        type: "tcp",
+        secure: config.secure,
+        host,
+        port,
+        preSetup: false,
+        bufferSize: config.bufferSize,
+      };
     case "websocket":
       let url;
       if ("url" in config) {
