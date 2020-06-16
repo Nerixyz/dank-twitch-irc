@@ -92,18 +92,21 @@ export class SingleConnection extends BaseClient {
     await this.transport.connect();
     this.emitConnected();
 
-    // FeelsDonkMan maybe await this?
-    Promise.all([
-      requestCapabilities(
-        this,
-        this.configuration.requestMembershipCapability
-      ),
-      sendLogin(
-        this,
-        this.configuration.username,
-        this.configuration.password
-      )
-    ]).then(() => this.emitReady(), console.error);
+    // check if the client is set up yet
+    if(!this.configuration.connection.preSetup) {
+      // FeelsDonkMan maybe await this?
+      Promise.all([
+        requestCapabilities(
+          this,
+          this.configuration.requestMembershipCapability
+        ),
+        sendLogin(
+          this,
+          this.configuration.username,
+          this.configuration.password
+        )
+      ]).then(() => this.emitReady(), e => this.emitError(e));
+    }
 
   }
 
