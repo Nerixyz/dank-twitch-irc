@@ -82,7 +82,7 @@ export class SingleConnection extends BaseClient {
     }
   }
 
-  public connect(): void {
+  public async connect(): Promise<void> {
     if (!this.unconnected) {
       throw new Error(
         "connect() may only be called on unconnected connections"
@@ -91,26 +91,30 @@ export class SingleConnection extends BaseClient {
 
     this.emitConnecting();
 
-    this.once("connect", () => {
-      this.transport.readable
-        .pipeThrough(new TransformStream(this.createSplitTransformer()))
-        .pipeTo(new WritableStream(this.createTransportSink()));
-      const promises = [
-        requestCapabilities(
-          this,
-          this.configuration.requestMembershipCapability
-        ),
-        sendLogin(
-          this,
-          this.configuration.username,
-          this.configuration.password
-        )
-      ];
+    this.transport.duplex.readable.pipeTo(new WritableStream( {
+      write: chunk => {
+        for(const line of chunk.split('\r\n')) {
+          this.handleLine(line);
+        }
+      }
+    })).catch(e => this.emitError(e));
 
-      Promise.all(promises).then(() => this.emitReady(), ignoreErrors);
-    });
+    await this.transport.connect();
+    this.emitConnected();
 
-    this.transport.connect(() => this.emitConnected());
+    // FeelsDonkMan maybe await this?
+    Promise.all([
+      requestCapabilities(
+        this,
+        this.configuration.requestMembershipCapability
+      ),
+      sendLogin(
+        this,
+        this.configuration.username,
+        this.configuration.password
+      )
+    ]).then(() => this.emitReady(), console.error);
+
   }
 
   public close(): void {
@@ -125,7 +129,11 @@ export class SingleConnection extends BaseClient {
   public sendRaw(command: string): void {
     validateIRCCommand(command);
     this.log.info(">", command);
-    this.transport.write(command + "\r\n");
+    const writer = this.transport.duplex.writable.getWriter();
+    //noinspection JSIgnoredPromiseFromCall -- no :)
+    writer.write(command + '\r\n');
+    // immediately release to not block the lock
+    writer.releaseLock();
   }
 
   public onConnect(): void {

@@ -1,20 +1,21 @@
 import {WebSocket, connectWebSocket} from "https://deno.land/std/ws/mod.ts";
 import { ExpandedWebSocketTransportConfiguration } from "../../config/expanded.ts";
-import { ignoreErrors } from "../../utils/ignore-errors.ts";
-import { Transport } from "./transport.ts";
+import { DuplexStream, Transport } from "./transport.ts";
 
 export class WebSocketTransport implements Transport {
-  public readable: ReadableStream<string>;
+  public duplex: DuplexStream<string>;
+  private readonly outTransformer: TransformStream<string, string>;
+  private readonly inTransformer: TransformStream<string, string>;
 
-  private duplex: TransformStream<string, string>;
-
-  private readonly config: ExpandedWebSocketTransportConfiguration;
   private wsStream?: WebSocket;
 
-  public constructor(config: ExpandedWebSocketTransportConfiguration) {
-    this.config = config;
-    this.duplex = new TransformStream();
-    this.readable = this.duplex.readable;
+  public constructor(private readonly config: ExpandedWebSocketTransportConfiguration) {
+    this.outTransformer = new TransformStream(undefined, new CountQueuingStrategy({highWaterMark: 5}));
+    this.inTransformer = new TransformStream();
+    this.duplex = {
+      readable: this.inTransformer.readable,
+      writable: this.outTransformer.writable,
+    };
   }
   close(): void {
     if(this.wsStream && !this.wsStream.isClosed) {
@@ -22,15 +23,21 @@ export class WebSocketTransport implements Transport {
     }
   }
 
-  public async connect(connectionListener?: () => void): Promise<void> {
+  public async connect(): Promise<void> {
     this.wsStream = await connectWebSocket(this.config.url);
 
-    asyncIteratorToReadable(this.wsStream).pipeTo(this.duplex.writable);
-    connectionListener?.();
-  }
-
-  public write(chunk: string) {
-    this.wsStream!.send(chunk);
+    //noinspection ES6MissingAwait
+    asyncIteratorToReadable(this.wsStream).pipeTo(this.inTransformer.writable);
+    //noinspection ES6MissingAwait -- This resolves once the piping is complete; so never
+    this.outTransformer.readable.pipeTo(new WritableStream({
+      write: (chunk, controller) => {
+        if(this.wsStream) {
+          this.wsStream.send(chunk).catch(e => controller.error(e));
+        } else {
+          controller.error(new Error("There's no open Websocket"));
+        }
+      }
+    }));
   }
 }
 
@@ -45,7 +52,7 @@ export function asyncIteratorToReadable(iterable: AsyncIterable<string | object>
           } else if(typeof result.value === "string") {
             return controller.enqueue(result.value);
           } else {
-            console.log(result.value);
+            // ignore i guess ...?
           }
         })
         .catch(e => controller.error(e));

@@ -54,9 +54,9 @@ export class ConnectionRateLimiter implements ClientMixin, ConnectionMixin {
   public applyToConnection(connection: SingleConnection): void {
     // override transport.connect
     applyReplacements(this, connection.transport, {
-      connect(originalFn, connectionListener): void {
-        this.acquire().then(() => {
-          originalFn(connectionListener);
+      connect(originalFn): Promise<void> {
+        return this.acquire().then(async () => {
+          await originalFn();
           this.releaseOnConnect(connection);
         });
       },
