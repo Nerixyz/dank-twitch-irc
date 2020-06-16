@@ -82,6 +82,7 @@ export class SingleConnection extends BaseClient {
     this.emitConnecting();
 
     this.transport.duplex.readable.pipeTo(new WritableStream( {
+      close: () => {this.emitClosed()},
       write: chunk => {
         for(const line of chunk.split('\r\n')) {
           this.handleLine(line);
