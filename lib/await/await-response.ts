@@ -131,8 +131,8 @@ export class ResponseAwaiter {
       this.config.errorMessage,
       cause
     );
-    queueMicrotask(() => this.conn.emitError(errorWithCause, true));
     this.rejectPromise(errorWithCause);
+    this.conn.emitError(errorWithCause, true);
   }
 
   private onNoResponse(reason: string): void {
