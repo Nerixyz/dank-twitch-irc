@@ -1,7 +1,7 @@
 import { setDefaults } from "../utils/set-defaults.ts";
 import {
   BasicTcpTransportConfiguration,
-  ClientConfiguration,
+  ClientConfiguration, DuplexTransportConfiguration,
 //  DuplexTransportConfiguration,
   RateLimitsConfig,
   TcpTransportConfiguration,
@@ -13,13 +13,9 @@ import {
   MessageRateLimits,
 } from "./message-rate-limits.ts";
 
-//export type ExpandedDuplexTransportConfiguration = Required<
-//  DuplexTransportConfiguration
-//>;
+export type ExpandedDuplexTransportConfiguration = Required<DuplexTransportConfiguration>;
 
-export type ExpandedTcpTransportConfiguration = Required<
-  TcpTransportConfiguration
-> & {
+export type ExpandedTcpTransportConfiguration = Required<TcpTransportConfiguration> & {
   preSetup: false;
 };
 
@@ -28,22 +24,20 @@ export type ExpandedWebSocketTransportConfiguration = WebSocketTransportConfigur
 };
 
 export type ExpandedTransportConfiguration =
-//  | ExpandedDuplexTransportConfiguration
+  | ExpandedDuplexTransportConfiguration
   | ExpandedTcpTransportConfiguration
   | ExpandedWebSocketTransportConfiguration;
 
-export type ExpandedClientConfiguration = Required<
-  Omit<ClientConfiguration, "connection" | "password" | "rateLimits">
-> & {
+export type ExpandedClientConfiguration =
+  Required<Omit<ClientConfiguration, "connection" | "password" | "rateLimits">>
+  & {
   password: string | undefined;
   connection: ExpandedTransportConfiguration;
   rateLimits: MessageRateLimits;
 };
 
-const defaults: Omit<
-  ExpandedClientConfiguration,
-  "connection" | "rateLimits"
-> & {
+const defaults: Omit<ExpandedClientConfiguration,
+  "connection" | "rateLimits"> & {
   connection: BasicTcpTransportConfiguration;
 } = {
   username: "justinfan12345",
@@ -53,9 +47,9 @@ const defaults: Omit<
   maxChannelCountPerConnection: 90,
 
   connection: {
-    type: 'tcp',
+    type: "tcp",
     secure: true,
-    bufferSize: 4096
+    bufferSize: 4096,
   },
 
   connectionRateLimits: {
@@ -68,12 +62,12 @@ const defaults: Omit<
 };
 
 export function expandTransportConfig(
-  config: TransportConfiguration | undefined
+  config: TransportConfiguration | undefined,
 ): ExpandedTransportConfiguration {
   if (config == null) {
     return expandTransportConfig({
       secure: true,
-      type: "websocket"
+      type: "websocket",
     });
   }
 
@@ -99,6 +93,8 @@ export function expandTransportConfig(
         preSetup: false,
         bufferSize: config.bufferSize,
       };
+    case "duplex":
+      return setDefaults(config, { preSetup: false });
     case "websocket":
       let url;
       if ("url" in config) {
@@ -119,7 +115,7 @@ export function expandTransportConfig(
 }
 
 export function expandRateLimitsConfig(
-  config: RateLimitsConfig | undefined
+  config: RateLimitsConfig | undefined,
 ): MessageRateLimits {
   if (config == null) {
     return messageRateLimitPresets.default;
@@ -133,11 +129,11 @@ export function expandRateLimitsConfig(
 }
 
 export function expandConfig(
-  config?: ClientConfiguration
+  config?: ClientConfiguration,
 ): ExpandedClientConfiguration {
   const newConfig = setDefaults(
     config,
-    defaults
+    defaults,
   ) as ExpandedClientConfiguration;
 
   newConfig.username = newConfig.username.toLowerCase();
