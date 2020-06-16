@@ -1,7 +1,9 @@
 import { ChatClient } from "./client/client.ts";
 import { SingleConnection } from "./client/connection.ts";
 import { assertStrictEquals, assert , assertThrowsAsync, fail} from "https://deno.land/std/testing/asserts.ts";
+import { DuplexStream } from "./client/transport/transport.ts";
 import { BaseError } from "./utils/base-error.ts";
+import { ignoreErrors } from "./utils/ignore-errors.ts";
 
 export function errorOf(p: Promise<any>): Promise<any> {
   return p.catch((e) => e);
@@ -27,7 +29,7 @@ function assertLink(e: Error, chain: any[], depth = 0): void {
   assertStrictEquals(
     e.message,
     message,
-    `Error at depth ${depth} should have error message "${message}"`
+    `Error at depth ${depth} should have error message "${message}" but got "${e.message}"`
   );
 
   // @ts-ignore e.cause is unknown to the compiler
@@ -85,55 +87,56 @@ export function assertThrowsChain(f: () => void, ...chain: any[]): void {
   fail("Function did not throw an exception");
 }
 
-export type MockTransportData = {
-  transport: Duplex;
-  data: any[];
-  emit: (...lines: string[]) => void;
-  end: (error?: Error) => void;
-  emitAndEnd: (...lines: string[]) => void;
-};
+export interface MockTransportData {
+  duplex: DuplexStream<string>,
+  data: string[],
+  emit: (...lines: string[]) => void,
+  end: (error?: Error) => Promise<void>,
+  emitAndEnd: (...lines: string[]) => Promise<void>,
+}
 
 export function createMockTransport(): MockTransportData {
-  const data: any[] = [];
+  const data: string[] = [];
 
-  const transport = new Duplex({
-    autoDestroy: true,
-    emitClose: true,
-    decodeStrings: false, // for write operations
-    defaultEncoding: "utf-8", // for write operations
-    encoding: "utf-8", // for read operations
-    write(
-      chunk: any,
-      encoding: string,
-      callback: (error?: Error | null) => void
-    ): void {
-      data.push(chunk.toString());
-      callback();
+  let readableController: ReadableStreamDefaultController;
+  let writableController: WritableStreamDefaultController;
+  const readable = new ReadableStream<string>({
+    start: controller => {
+      readableController = controller;
     },
-    // tslint:disable-next-line:no-empty
-    read(): void {},
   });
-
-  const emit = (...lines: string[]): void => {
-    transport.push(lines.map((line) => line + "\r\n").join(""));
+  const writable = new WritableStream<string>({
+    start: controller => {
+      writableController = controller;
+    },
+    write: chunk => {
+      data.push(chunk)
+    },
+  });
+  const emit = (...lines: string[]) => readableController.enqueue(lines.map((line) => line + "\r\n").join(""));
+  const end = async (error?: Error) => {
+    if(error) {
+      readableController.error(error);
+      writableController.error(error);
+    }
+    else {
+      readableController.close();
+      await writable.close().catch(ignoreErrors);
+    }
   };
-
-  const end = (error?: Error): void => {
-    transport.destroy(error);
+  const emitAndEnd = async (...lines: string[]) => {
+    emit(...lines);
+    await end();
   };
-
-  const emitAndEnd = (...lines: string[]): void => {
-    setImmediate(emit, ...lines);
-    setImmediate(end);
-  };
-
   return {
-    transport,
+    duplex: {
+      readable,
+      writable,
+    },
     data,
-    emit,
-    end,
-    emitAndEnd,
-  };
+    emit, end,
+    emitAndEnd
+  }
 }
 
 export type FakeConnectionData = {
@@ -141,21 +144,20 @@ export type FakeConnectionData = {
   clientError: Promise<never>;
 } & MockTransportData;
 
-export function fakeConnection(): FakeConnectionData {
-  // don't start sending pings
-  sinon.stub(SingleConnection.prototype, "onConnect");
+export async function fakeConnection(): Promise<FakeConnectionData> {
+  SingleConnection.prototype.onConnect = () => {};
 
   const transport = createMockTransport();
 
   const fakeConn = new SingleConnection({
     connection: {
       type: "duplex",
-      stream: () => transport.transport,
+      stream: () => transport.duplex,
       preSetup: true,
     },
   });
 
-  fakeConn.connect();
+  await fakeConn.connect();
 
   return {
     ...transport,
@@ -179,10 +181,10 @@ export type FakeClientData = {
 export function fakeClient(connect = true): FakeClientData {
   const transports: MockTransportData[] = [];
 
-  const getStream = (): Duplex => {
+  const getStream = (): DuplexStream<string> => {
     const newTransport = createMockTransport();
     transports.push(newTransport);
-    return newTransport.transport;
+    return newTransport.duplex;
   };
 
   const client = new ChatClient({
@@ -202,7 +204,7 @@ export function fakeClient(connect = true): FakeClientData {
     emit: (...lines) => transports[0].emit(...lines),
     emitAndEnd: (...lines) => {
       transports[0].emit(...lines);
-      setImmediate(() => client.destroy());
+      queueMicrotask(() => client.destroy());
     },
     end: () => {
       client.destroy();
