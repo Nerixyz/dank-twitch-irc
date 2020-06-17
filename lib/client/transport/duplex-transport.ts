@@ -1,4 +1,5 @@
 import { ExpandedDuplexTransportConfiguration } from "../../config/expanded.ts";
+import { ignoreErrors } from "../../utils/ignore-errors.ts";
 import { DuplexStream, Transport } from "./transport.ts";
 
 export class DuplexTransport implements Transport {
@@ -9,7 +10,9 @@ export class DuplexTransport implements Transport {
   }
 
 
-  public close(): void {}
+  public close(): void {
+    this.duplex.writable.close().catch(ignoreErrors);
+  }
   public connect(): Promise<void> {
     return Promise.resolve(undefined);
   }
