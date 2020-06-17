@@ -1,6 +1,6 @@
 import { ChatClient } from "./client/client.ts";
 import { SingleConnection } from "./client/connection.ts";
-import { assertStrictEquals, assert , assertThrowsAsync, fail} from "https://deno.land/std/testing/asserts.ts";
+import { assertStrictEquals, assert , assertThrowsAsync, fail, assertEquals, AssertionError} from "https://deno.land/std/testing/asserts.ts";
 import { DuplexStream } from "./client/transport/transport.ts";
 import { BaseError } from "./utils/base-error.ts";
 import { ignoreErrors } from "./utils/ignore-errors.ts";
@@ -101,11 +101,15 @@ export function createMockTransport(): MockTransportData {
   let readableController: ReadableStreamDefaultController;
   let writableController: WritableStreamDefaultController;
   const readable = new ReadableStream<string>({
+    cancel: controller => {
+      controller.close();
+    },
     start: controller => {
       readableController = controller;
     },
   });
   const writable = new WritableStream<string>({
+    close: () => readableController.close(),
     start: controller => {
       writableController = controller;
     },
@@ -117,12 +121,11 @@ export function createMockTransport(): MockTransportData {
   const end = async (error?: Error) => {
     if(error) {
       readableController.error(error);
-      writableController.error(error);
     }
     else {
       readableController.close();
-      await writable.close().catch(ignoreErrors);
     }
+    await writable.close().catch(ignoreErrors);
   };
   const emitAndEnd = async (...lines: string[]) => {
     emit(...lines);
@@ -204,7 +207,7 @@ export function fakeClient(connect = true): FakeClientData {
     emit: (...lines) => transports[0].emit(...lines),
     emitAndEnd: (...lines) => {
       transports[0].emit(...lines);
-      queueMicrotask(() => client.destroy());
+      queueMicrotask(() => (client.destroy()));
     },
     end: () => {
       client.destroy();
@@ -216,4 +219,40 @@ export function fakeClient(connect = true): FakeClientData {
     }),
     transports,
   };
+}
+
+type FakeFn = ((...args: unknown[]) => void) & {
+  onceWithArguments(...args: unknown[]): void;
+}
+export function sinonFake(): FakeFn {
+  let callCount = 0;
+  let lastArguments: unknown[];
+  const fn = (...args: unknown[]) => {
+    callCount++;
+    lastArguments = args;
+  };
+  fn.onceWithArguments = (...args: unknown[]) => {
+    assertStrictEquals(callCount, 1, 'Should be called once');
+    assertEquals(lastArguments, args, 'Should have the same arguments');
+  }
+  return fn;
+}
+
+export async function switchToImmediateTimeout<T>(fn: () => Promise<T>): Promise<T> {
+  const base = setTimeout;
+  globalThis.setTimeout = fn => base(fn);
+  const ret = await fn();
+  globalThis.setTimeout = base;
+  return ret;
+}
+
+export function assertSameMembers(target: unknown[], base: unknown[]) {
+  if(!target || !base) throw new AssertionError("Received undefined");
+  if(target.length !== base.length) throw new AssertionError("Different length");
+
+  for(const item of base) {
+    if(!target.includes(item)) {
+      throw new AssertionError("Arrays are different");
+    }
+  }
 }
