@@ -7,7 +7,7 @@ export class PingTimeoutError extends ConnectionError {}
 
 function randomPingIdentifier(): string {
   // scuffed but a quick replacement
-  return `dank-twitch-irc:manual:${(Math.random()*10e18).toString(16)}${(Math.random()*10e18).toString(16)}`;
+  return `dank-twitch-irc:manual:${Array.from(crypto.getRandomValues(new Uint8Array(32))).map(x => (x & 0xf).toString(16)).join('')}`;
 }
 
 export async function sendPing(
