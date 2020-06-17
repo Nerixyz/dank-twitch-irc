@@ -1,5 +1,6 @@
 import { ChatClient } from "../client/client.ts";
 import { PrivmsgMessage } from "../message/twitch-types/privmsg.ts";
+import { me } from "../operations/say.ts";
 import { applyReplacements } from "../utils/apply-function-replacements.ts";
 import { ClientMixin } from "./base-mixin.ts";
 import { canSpamFast } from "./ratelimiters/utils.ts";
