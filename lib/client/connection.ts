@@ -28,7 +28,7 @@ export class SingleConnection extends BaseClient {
   public readonly transport: Transport;
 
   protected readonly log = debugLogger.getLogger(
-    `dank-twitch-irc:connection:${this.connectionID}`
+    `dank-twitch-irc:connection:${this.connectionID}`,
   );
 
   public constructor(configuration?: ClientConfiguration) {
@@ -50,62 +50,49 @@ export class SingleConnection extends BaseClient {
     handleReconnectMessage(this);
   }
 
-  public createTransportSink(): UnderlyingSink<string> {
-    return {
-      close: () => {
-        this.emitClosed();
-      },
-      abort: (reason: Error) => {
-        const emittedError = new ConnectionError(
-          "Error occurred in transport layer",
-          reason
-        );
-        this.emitError(emittedError);
-        this.emitClosed(emittedError);
-        this.transport.close();
-      },
-      write: (chunk: string) => {
-        this.handleLine(chunk);
-      },
-      start() {
-      }
-    };
-  }
-
   public async connect(): Promise<void> {
     if (!this.unconnected) {
       throw new Error(
-        "connect() may only be called on unconnected connections"
+        "connect() may only be called on unconnected connections",
       );
     }
 
     this.emitConnecting();
 
-    this.transport.duplex.readable.pipeTo(new WritableStream( {
-      close: () => {this.emitClosed()},
+    this.transport.duplex.readable.pipeTo(new WritableStream({
+      close: () => {this.emitClosed();},
       write: chunk => {
-        for(const line of chunk.split('\r\n')) {
+        for (const line of chunk.split("\r\n")) {
           this.handleLine(line);
         }
-      }
+      },
+      abort: (reason: Error) => {
+        const emittedError = new ConnectionError(
+          "Error occurred in transport layer",
+          reason,
+        );
+        this.emitError(emittedError);
+        this.emitClosed(emittedError);
+        this.transport.close();
+      },
     })).catch(e => this.emitError(e));
 
     await this.transport.connect();
     this.emitConnected();
 
     // check if the client is set up yet
-    if(!this.configuration.connection.preSetup) {
+    if (!this.configuration.connection.preSetup) {
       // FeelsDonkMan maybe await this?
       Promise.all([
         requestCapabilities(
           this,
-          this.configuration.requestMembershipCapability
+          this.configuration.requestMembershipCapability,
         ),
         sendLogin(
           this,
           this.configuration.username,
-          this.configuration.password
-        )
+          this.configuration.password,
+        ),
       ]).then(() => this.emitReady(), e => this.emitError(e));
     }
 
@@ -125,7 +112,7 @@ export class SingleConnection extends BaseClient {
     this.log.info(">", command);
     const writer = this.transport.duplex.writable.getWriter();
     //noinspection JSIgnoredPromiseFromCall -- no :)
-    writer.write(command + '\r\n');
+    writer.write(command + "\r\n");
     // immediately release to not block the lock
     writer.releaseLock();
   }
@@ -153,8 +140,8 @@ export class SingleConnection extends BaseClient {
       this.emitError(
         new ProtocolError(
           `Error while parsing IRC message from line "${line}"`,
-          e
-        )
+          e,
+        ),
       );
       return;
     }
